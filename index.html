@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>GrapesJS Newsletter Editor</title>
+    <link rel="stylesheet" href="https://grapesjs.com/stylesheets/grapes.min.css">
+    <link rel="stylesheet" href="https://grapesjs.com/stylesheets/material.css">
+    <link rel="stylesheet" href="https://grapesjs.com/stylesheets/tooltip.css">
+    <link rel="stylesheet" href="https://grapesjs.com/stylesheets/toastr.min.css">
+    <link rel="stylesheet" href="https://grapesjs.com/stylesheets/grapesjs-preset-webpage.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://grapesjs.com/js/grapes.min.js"></script>
+    <script src="https://grapesjs.com/js/grapesjs-preset-webpage.min.js"></script>
+    <script src="https://grapesjs.com/js/toastr.min.js"></script>
+
+    <script src="https://grapesjs.com/js/ajaxable.min.js"></script> 
+  </head>
+  <style>
+        .icon-add-comp::before, .icon-comp100::before,.icon-comp50::before,.icon-comp30::before,.icon-rm::before{ content: '';}
+        .icon-add-comp {
+          background: url("https://grapesjs.com/img/icon-sq-a.png") no-repeat center;
+        }
+        .icon-comp100 {
+          background: url("https://grapesjs.com/img/icon-sq-1.png") no-repeat center;
+        }
+        .icon-comp50 {
+          background: url("https://grapesjs.com/img/icon-sq-2.png") no-repeat center;
+        }
+        .icon-comp30 {
+          background: url("https://grapesjs.com/img/icon-sq-3.png") no-repeat center;
+        }
+        .icon-rm {
+          background: url("https://grapesjs.com/img/icon-sq-r.png") no-repeat center;
+        }
+
+        .icons-flex {
+          background-size: 70% 65% !important;
+          height: 15px;
+          width: 17px;
+          opacity: 0.9;
+        }
+        .icon-dir-row {
+          background: url("https://grapesjs.com/img/flex-dir-row.png") no-repeat center;
+        }
+        .icon-dir-row-rev {
+          background: url("https://grapesjs.com/img/flex-dir-row-rev.png") no-repeat center;
+        }
+        .icon-dir-col {
+          background: url("https://grapesjs.com/img/flex-dir-col.png") no-repeat center;
+        }
+        .icon-dir-col-rev {
+          background: url("https://grapesjs.com/img/flex-dir-col-rev.png") no-repeat center;
+        }
+        .icon-just-start{
+         background: url("https://grapesjs.com/img/flex-just-start.png") no-repeat center;
+        }
+        .icon-just-end{
+         background: url("https://grapesjs.com/img/flex-just-end.png") no-repeat center;
+        }
+        .icon-just-sp-bet{
+         background: url("https://grapesjs.com/img/flex-just-sp-bet.png") no-repeat center;
+        }
+        .icon-just-sp-ar{
+         background: url("https://grapesjs.com/img/flex-just-sp-ar.png") no-repeat center;
+        }
+        .icon-just-sp-cent{
+         background: url("https://grapesjs.com/img/flex-just-sp-cent.png") no-repeat center;
+        }
+        .icon-al-start{
+         background: url("https://grapesjs.com/img/flex-al-start.png") no-repeat center;
+        }
+        .icon-al-end{
+         background: url("https://grapesjs.com/img/flex-al-end.png") no-repeat center;
+        }
+        .icon-al-str{
+         background: url("https://grapesjs.com/img/flex-al-str.png") no-repeat center;
+        }
+        .icon-al-center{
+         background: url("https://grapesjs.com/img/flex-al-center.png") no-repeat center;
+        }
+
+         [data-tooltip]::after {
+           background: rgba(51, 51, 51, 0.9);
+         }
+
+    body, html{ height: 100%; margin: 0;}
+    #gjs-rte-toolbar .gjs-rte-btn,
+    .gjs-btn-prim,
+    .gjs-btnt,
+    .gjs-clm-tags .gjs-sm-composite.gjs-clm-field,
+    .gjs-clm-tags .gjs-sm-field.gjs-sm-composite,
+    .gjs-clm-tags .gjs-sm-stack #gjs-sm-add,
+    .gjs-color-main,
+    .gjs-mdl-dialog,
+    .gjs-off-prv,
+    .gjs-pn-btn,
+    .gjs-pn-panel,
+    .gjs-sm-sector .gjs-sm-composite.gjs-clm-field,
+    .gjs-sm-sector .gjs-sm-field.gjs-sm-composite,
+    .gjs-sm-sector .gjs-sm-stack #gjs-sm-add,
+    .gjs-two-color 
+        { color: #fff !important;}
+    .gjs-btnt.gjs-pn-active,
+    .gjs-color-active,
+    .gjs-pn-btn.gjs-pn-active,
+    .gjs-pn-btn:active,
+    .gjs-pn-btn:hover,
+    .gjs-block:hover 
+        { color: #F2B005 !important;}
+    .gjs-one-bg 
+        {background-color: #0B0B0B ; }
+    #gjs-pn-views .gjs-pn-active {
+        color: rgba(255, 255, 255, 0.9);
+        border-bottom: 2px solid white;
+        border-radius: 0; 
+    }
+  </style>
+  <body>
+    <div id="gjs" style="height:0px; overflow:hidden">
+        
+    </div>      
+
+    <script type="text/javascript">
+      var host = 'http://artf.github.io/grapesjs/';
+      var images = [
+        host + 'img/grapesjs-logo.png',
+        host + 'img/tmp-blocks.jpg',
+        host + 'img/tmp-tgl-images.jpg',
+        host + 'img/tmp-send-test.jpg',
+        host + 'img/tmp-devices.jpg',
+      ];
+
+      // Set up GrapesJS editor with the Newsletter plugin
+      var editor = grapesjs.init({
+        height: '100%',
+        //noticeOnUnload: 0,
+        storageManager:{
+          autoload: 0,
+        },
+        assetManager: {
+          assets: images,
+          upload: 0,
+          uploadText: 'Uploading is not available in this demo',
+        },
+        container : '#gjs',
+        fromElement: true,
+        
+        plugins: [
+          'gjs-preset-webpage'
+        ],
+        pluginsOpts: {
+          'gjs-preset-webpage': {
+            modalImportTitle: 'Import Template',
+            modalImportLabel: '<div style="margin-bottom: 10px; font-size: 13px;">Paste here your HTML/CSS and click Import</div>',
+            modalImportContent: function(editor) {
+              return editor.getHtml() + '<style>'+editor.getCss()+'</style>'
+            },
+            filestackOpts: null, //{ key: 'AYmqZc2e8RLGLE7TGkX3Hz' },
+            aviaryOpts: false,
+            blocksBasicOpts: { flexGrid: 1 },
+            customStyleManager: [{
+                name: 'Flex',
+                open: false,
+                properties: [{
+                  name: 'Flex Container',
+                  property: 'display',
+                  type: 'select',
+                  defaults: 'block',
+                  list: [
+                    { value: 'block', name: 'Disable'},
+                    { value: 'flex', name: 'Enable'}
+                  ],
+                },{
+                  name: 'Flex Parent',
+                  property: 'label-parent-flex',
+                  type: 'integer',
+                },{
+                  name      : 'Direction',
+                  property  : 'flex-direction',
+                  type    : 'radio',
+                  defaults  : 'row',
+                  list    : [{
+                            value   : 'row',
+                            name    : 'Row',
+                            className : 'icons-flex icon-dir-row',
+                            title   : 'Row',
+                          },{
+                            value   : 'row-reverse',
+                            name    : 'Row reverse',
+                            className : 'icons-flex icon-dir-row-rev',
+                            title   : 'Row reverse',
+                          },{
+                            value   : 'column',
+                            name    : 'Column',
+                            title   : 'Column',
+                            className : 'icons-flex icon-dir-col',
+                          },{
+                            value   : 'column-reverse',
+                            name    : 'Column reverse',
+                            title   : 'Column reverse',
+                            className : 'icons-flex icon-dir-col-rev',
+                          }],
+                },{
+                  name      : 'Justify',
+                  property  : 'justify-content',
+                  type    : 'radio',
+                  defaults  : 'flex-start',
+                  list    : [{
+                            value   : 'flex-start',
+                            className : 'icons-flex icon-just-start',
+                            title   : 'Start',
+                          },{
+                            value   : 'flex-end',
+                            title    : 'End',
+                            className : 'icons-flex icon-just-end',
+                          },{
+                            value   : 'space-between',
+                            title    : 'Space between',
+                            className : 'icons-flex icon-just-sp-bet',
+                          },{
+                            value   : 'space-around',
+                            title    : 'Space around',
+                            className : 'icons-flex icon-just-sp-ar',
+                          },{
+                            value   : 'center',
+                            title    : 'Center',
+                            className : 'icons-flex icon-just-sp-cent',
+                          }],
+                },{
+                  name      : 'Align',
+                  property  : 'align-items',
+                  type    : 'radio',
+                  defaults  : 'center',
+                  list    : [{
+                            value   : 'flex-start',
+                            title    : 'Start',
+                            className : 'icons-flex icon-al-start',
+                          },{
+                            value   : 'flex-end',
+                            title    : 'End',
+                            className : 'icons-flex icon-al-end',
+                          },{
+                            value   : 'stretch',
+                            title    : 'Stretch',
+                            className : 'icons-flex icon-al-str',
+                          },{
+                            value   : 'center',
+                            title    : 'Center',
+                            className : 'icons-flex icon-al-center',
+                          }],
+                },{
+                  name: 'Flex Children',
+                  property: 'label-parent-flex',
+                  type: 'integer',
+                },{
+                  name:     'Order',
+                  property:   'order',
+                  type:     'integer',
+                  defaults :  0,
+                  min: 0
+                },{
+                  name    : 'Flex',
+                  property  : 'flex',
+                  type    : 'composite',
+                  properties  : [{
+                          name:     'Grow',
+                          property:   'flex-grow',
+                          type:     'integer',
+                          defaults :  0,
+                          min: 0
+                        },{
+                          name:     'Shrink',
+                          property:   'flex-shrink',
+                          type:     'integer',
+                          defaults :  0,
+                          min: 0
+                        },{
+                          name:     'Basis',
+                          property:   'flex-basis',
+                          type:     'integer',
+                          units:    ['px','%',''],
+                          unit: '',
+                          defaults :  'auto',
+                        }],
+                },{
+                  name      : 'Align',
+                  property  : 'align-self',
+                  type      : 'radio',
+                  defaults  : 'auto',
+                  list    : [{
+                            value   : 'auto',
+                            name    : 'Auto',
+                          },{
+                            value   : 'flex-start',
+                            title    : 'Start',
+                            className : 'icons-flex icon-al-start',
+                          },{
+                            value   : 'flex-end',
+                            title    : 'End',
+                            className : 'icons-flex icon-al-end',
+                          },{
+                            value   : 'stretch',
+                            title    : 'Stretch',
+                            className : 'icons-flex icon-al-str',
+                          },{
+                            value   : 'center',
+                            title    : 'Center',
+                            className : 'icons-flex icon-al-center',
+                          }],
+                }]
+              }
+            ],
+          },
+        },
+
+      });
+
+
+      editor.BlockManager.add('article-block', {
+        label: `<div>
+            <svg style="width: 50px;padding-bottom: 10px;" aria-hidden="true" focusable="false" data-prefix="fal" data-icon="newspaper" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-newspaper fa-w-18"><path fill="currentColor" d="M552 64H88c-13.234 0-24 10.767-24 24v8H24c-13.255 0-24 10.745-24 24v280c0 26.51 21.49 48 48 48h504c13.233 0 24-10.767 24-24V88c0-13.233-10.767-24-24-24zM32 400V128h32v272c0 8.822-7.178 16-16 16s-16-7.178-16-16zm512 16H93.258A47.897 47.897 0 0 0 96 400V96h448v320zm-404-96h168c6.627 0 12-5.373 12-12V140c0-6.627-5.373-12-12-12H140c-6.627 0-12 5.373-12 12v168c0 6.627 5.373 12 12 12zm20-160h128v128H160V160zm-32 212v-8c0-6.627 5.373-12 12-12h168c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12H140c-6.627 0-12-5.373-12-12zm224 0v-8c0-6.627 5.373-12 12-12h136c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12H364c-6.627 0-12-5.373-12-12zm0-64v-8c0-6.627 5.373-12 12-12h136c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12H364c-6.627 0-12-5.373-12-12zm0-128v-8c0-6.627 5.373-12 12-12h136c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12H364c-6.627 0-12-5.373-12-12zm0 64v-8c0-6.627 5.373-12 12-12h136c6.627 0 12 5.373 12 12v8c0 6.627-5.373 12-12 12H364c-6.627 0-12-5.373-12-12z" class=""></path></svg>
+            <div class="my-label-block">Article</div>
+          </div>`,
+        content: `<div style="padding: 5px; float: left">` +
+          `<img style="max-height: 200px" />` +
+          `<div style="font-family:Tahoma, Geneva, sans-serif;font-weight:700;font-size:20px;padding:5px 5px 5px 5px; overflow: hidden">Insert your text here</div>` +
+          `<div style="font-family:Tahoma, Geneva, sans-serif;font-size: 12px;padding:5px 5px 5px 5px; overflow: hidden">Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here</div>` +
+          `</div>`,
+        category: 'Basic',
+        attributes: {
+          title: 'Insert article'
+        }
+      });
+
+      editor.BlockManager.add('event-block', {
+        label: `<div>
+            <svg style="height: 45px; padding-bottom: 10px;" aria-hidden="true" focusable="false" data-prefix="fal" data-icon="calendar-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-calendar-alt fa-w-14"><path fill="currentColor" d="M400 64h-48V12c0-6.6-5.4-12-12-12h-8c-6.6 0-12 5.4-12 12v52H128V12c0-6.6-5.4-12-12-12h-8c-6.6 0-12 5.4-12 12v52H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM48 96h352c8.8 0 16 7.2 16 16v48H32v-48c0-8.8 7.2-16 16-16zm352 384H48c-8.8 0-16-7.2-16-16V192h384v272c0 8.8-7.2 16-16 16zM148 320h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm-96 96h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm-96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm192 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12z" class=""></path></svg>
+            <div class="my-label-block">Event</div>
+          </div>`,
+        content: `<div style="padding: 5px; float: left">` +
+          `<div style="background-color: black; color: white; padding: 5px; font-family: Arial; margin-bottom: 5px">Insert date here</div>` +
+          `<img style="max-height: 200px" />` +
+          `<div style="font-family:Tahoma, Geneva, sans-serif;font-weight:700;font-size:20px;padding:5px 5px 5px 5px; overflow: hidden">Insert your text here</div>` +
+          `<div style="font-family:Tahoma, Geneva, sans-serif;font-size: 12px;padding:5px 5px 5px 5px; overflow: hidden">Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here Insert your text here</div>` +
+          `</div>`,
+        category: 'Basic',
+        attributes: {
+          title: 'Insert event'
+        }
+      });
+    </script>
+  </body>
+</html>
